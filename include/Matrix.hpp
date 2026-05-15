@@ -1,6 +1,7 @@
 #include "Sequence.hpp"
-
+#include "concepts.hpp"
 template <typename T, template <typename> class Container> // добавить концепты
+    requires SequenceLike<Container<T>>
 class Matrix
 {
 private:
@@ -44,4 +45,14 @@ public:
     }
     size_t getRows() const { return rows; }
     size_t getCols() const { return columns; }
+    Matrix operator+(const Matrix &other) const
+    {
+        if (rows != other.rows || columns != other.columns)
+            throw InvalidArgument("Matrix::+: размеры не совпадают");
+        Matrix result(rows, columns);
+        for (size_t i = 0; i < rows; ++i)
+            for (size_t j = 0; j < columns; ++j)
+                result.set(i, j, get(i, j) + other.get(i, j));
+        return result;
+    }
 };
