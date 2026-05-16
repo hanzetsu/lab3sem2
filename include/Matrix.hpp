@@ -101,5 +101,38 @@ public:
             for (std::size_t j = 0; j < cols; ++j)
                 result.set(j, i, get(i, j));
         return result;
-    
+        }
+            T determinant() const {
+        if (rows != cols)
+            throw InvalidArgument("Matrix::determinant: матрица не квадратная");
+        Matrix temp = *this;
+        T det = T(1);
+        const std::size_t n = rows;
+
+        for (std::size_t i = 0; i < n; ++i) {
+            std::size_t pivotRow = i;
+            for (std::size_t k = i + 1; k < n; ++k) {
+                if (std::abs(temp.get(k, i)) > std::abs(temp.get(pivotRow, i)))
+                    pivotRow = k;
+            }
+            if (std::abs(temp.get(pivotRow, i)) < T(1e-12))
+                return T(0);
+
+            if (pivotRow != i) {
+                temp.swapRows(i, pivotRow);
+                det = -det;
+            }
+
+            det *= temp.get(i, i);
+
+            for (std::size_t k = i + 1; k < n; ++k) {
+                T factor = temp.get(k, i) / temp.get(i, i);
+                for (std::size_t j = i; j < n; ++j) {
+                    T newVal = temp.get(k, j) - factor * temp.get(i, j);
+                    temp.set(k, j, newVal);
+                }
+            }
+        }
+        return det;
+    }
 };
