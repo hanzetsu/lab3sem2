@@ -41,3 +41,11 @@ target_include_directories(test_matrix PRIVATE
 )
 enable_testing()
 add_test(NAME MatrixTest COMMAND test_matrix)
+
+add_executable(test_vector tests/test_vector.cpp)
+target_include_directories(test_vector PRIVATE
+    ${OLD_INCLUDE_PATH}
+    ${OLD_TESTS_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+add_test(NAME VectorTest COMMAND test_vector)
