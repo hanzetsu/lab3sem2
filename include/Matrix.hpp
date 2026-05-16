@@ -66,4 +66,20 @@ public:
                 result.Set(i, j, Get(i, j) + other.Get(i, j));
         return result;
     }
+        Matrix operator-(const Matrix& other) const {
+        if (rows != other.rows || cols != other.cols)
+            throw InvalidArgument("Matrix::-: размеры не совпадают");
+        Matrix result(rows, cols);
+        for (std::size_t i = 0; i < rows; ++i)
+            for (std::size_t j = 0; j < cols; ++j)
+                result.set(i, j, get(i, j) - other.get(i, j));
+        return result;
+    }
+        Matrix operator*(T scalar) const {
+        Matrix result(rows, cols);
+        for (std::size_t i = 0; i < rows; ++i)
+            for (std::size_t j = 0; j < cols; ++j)
+                result.set(i, j, get(i, j) * scalar);
+        return result;
+    }
 };
