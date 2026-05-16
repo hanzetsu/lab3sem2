@@ -1,8 +1,10 @@
 #include "Sequence.hpp"
 #include "concepts.hpp"
 #include <iostream>
+#include <cmath>
+
 template <typename T, template <typename> class Container>
- requires SequenceLike<Container<T>>
+    requires SequenceLike<Container<T>>
 class Matrix
 {
 private:
@@ -27,14 +29,11 @@ public:
     Matrix(std::size_t rows, std::size_t cols, T initValue = T{})
         : data(rows), rows(rows), columns(cols)
     {
-
         for (std::size_t i = 0; i < rows; ++i)
         {
             Container<T> row(cols);
-
             for (std::size_t j = 0; j < cols; ++j)
                 row.Set(j, initValue);
-
             data.Set(i, row);
         }
     }
@@ -52,16 +51,18 @@ public:
     void Set(size_t row, size_t col, T value)
     {
         if (col >= columns)
-            throw IndexOutOfRange(col, rows * columns, "");
-
+            throw IndexOutOfRange(col, rows * columns, "Matrix::Set: индекс столбца выходит за матрицу");
         if (row >= rows)
-            throw IndexOutOfRange(row, rows * columns, "");
-
-        data.Get(row).Set(col, value);
+            throw IndexOutOfRange(row, rows * columns, "Matrix::Set: индекс ряда выходит за матрицу");
+        auto rowSeq = data.Get(row);
+        rowSeq.Set(col, value);
+        data.Set(row, rowSeq);
     }
+
     size_t getRows() const { return rows; }
     size_t getCols() const { return columns; }
     T operator()(std::size_t row, std::size_t col) const { return Get(row, col); }
+
     Matrix operator+(const Matrix &other) const
     {
         if (rows != other.rows || columns != other.columns)
@@ -72,44 +73,49 @@ public:
                 result.Set(i, j, Get(i, j) + other.Get(i, j));
         return result;
     }
-        Matrix operator-(const Matrix& other) const {
-        if (rows != other.rows || cols != other.cols)
+
+    Matrix operator-(const Matrix& other) const {
+        if (rows != other.rows || columns != other.columns)
             throw InvalidArgument("Matrix::-: размеры не совпадают");
-        Matrix result(rows, cols);
+        Matrix result(rows, columns);
         for (std::size_t i = 0; i < rows; ++i)
-            for (std::size_t j = 0; j < cols; ++j)
-                result.set(i, j, get(i, j) - other.get(i, j));
+            for (std::size_t j = 0; j < columns; ++j)
+                result.Set(i, j, Get(i, j) - other.Get(i, j));
         return result;
     }
-        Matrix operator*(T scalar) const {
-        Matrix result(rows, cols);
+
+    Matrix operator*(T scalar) const {
+        Matrix result(rows, columns);
         for (std::size_t i = 0; i < rows; ++i)
-            for (std::size_t j = 0; j < cols; ++j)
-                result.set(i, j, get(i, j) * scalar);
+            for (std::size_t j = 0; j < columns; ++j)
+                result.Set(i, j, Get(i, j) * scalar);
         return result;
     }
-     Matrix operator*(const Matrix& other) const {
-        if (cols != other.rows)
+
+    Matrix operator*(const Matrix& other) const {
+        if (columns != other.rows)
             throw InvalidArgument("Matrix::*: количество столбцов первой не равно количеству строк второй");
-        Matrix result(rows, other.cols, T(0));
+        Matrix result(rows, other.columns, T(0));
         for (std::size_t i = 0; i < rows; ++i)
-            for (std::size_t j = 0; j < other.cols; ++j) {
+            for (std::size_t j = 0; j < other.columns; ++j) {
                 T sum = T(0);
-                for (std::size_t k = 0; k < cols; ++k)
-                    sum += get(i, k) * other.get(k, j);
-                result.set(i, j, sum);
+                for (std::size_t k = 0; k < columns; ++k)
+                    sum += Get(i, k) * other.Get(k, j);
+                result.Set(i, j, sum);
             }
         return result;
     }
-        Matrix transpose() const {
-        Matrix result(cols, rows);
+
+    Matrix transpose() const {
+        Matrix result(columns, rows);
         for (std::size_t i = 0; i < rows; ++i)
-            for (std::size_t j = 0; j < cols; ++j)
-                result.set(j, i, get(i, j));
+            for (std::size_t j = 0; j < columns; ++j)
+                result.Set(j, i, Get(i, j));
         return result;
-        }
-            T determinant() const {
-        if (rows != cols)
+    }
+
+    T determinant() const {
+        if (rows != columns)
             throw InvalidArgument("Matrix::determinant: матрица не квадратная");
         Matrix temp = *this;
         T det = T(1);
@@ -118,10 +124,10 @@ public:
         for (std::size_t i = 0; i < n; ++i) {
             std::size_t pivotRow = i;
             for (std::size_t k = i + 1; k < n; ++k) {
-                if (std::abs(temp.get(k, i)) > std::abs(temp.get(pivotRow, i)))
+                if (std::abs(temp.Get(k, i)) > std::abs(temp.Get(pivotRow, i)))
                     pivotRow = k;
             }
-            if (std::abs(temp.get(pivotRow, i)) < T(1e-12))
+            if (std::abs(temp.Get(pivotRow, i)) < T(1e-12))
                 return T(0);
 
             if (pivotRow != i) {
@@ -129,53 +135,54 @@ public:
                 det = -det;
             }
 
-            det *= temp.get(i, i);
+            det *= temp.Get(i, i);
 
             for (std::size_t k = i + 1; k < n; ++k) {
-                T factor = temp.get(k, i) / temp.get(i, i);
+                T factor = temp.Get(k, i) / temp.Get(i, i);
                 for (std::size_t j = i; j < n; ++j) {
-                    T newVal = temp.get(k, j) - factor * temp.get(i, j);
-                    temp.set(k, j, newVal);
+                    T newVal = temp.Get(k, j) - factor * temp.Get(i, j);
+                    temp.Set(k, j, newVal);
                 }
             }
         }
         return det;
     }
-        Matrix inverse() const {
-        if (rows != cols)
+
+    Matrix inverse() const {
+        if (rows != columns)
             throw InvalidArgument("Matrix::inverse: матрица не квадратная");
         std::size_t n = rows;
         Matrix augmented(n, 2 * n);
         for (std::size_t i = 0; i < n; ++i) {
             for (std::size_t j = 0; j < n; ++j)
-                augmented.set(i, j, get(i, j));
-            augmented.set(i, n + i, T(1));
+                augmented.Set(i, j, Get(i, j));
+            augmented.Set(i, n + i, T(1));
         }
         for (std::size_t i = 0; i < n; ++i) {
             std::size_t pivotRow = i;
             for (std::size_t k = i + 1; k < n; ++k)
-                if (std::abs(augmented.get(k, i)) > std::abs(augmented.get(pivotRow, i)))
+                if (std::abs(augmented.Get(k, i)) > std::abs(augmented.Get(pivotRow, i)))
                     pivotRow = k;
-            if (std::abs(augmented.get(pivotRow, i)) < T(1e-12))
+            if (std::abs(augmented.Get(pivotRow, i)) < T(1e-12))
                 throw InvalidArgument("Matrix::inverse: матрица вырождена");
             if (pivotRow != i)
                 augmented.swapRows(i, pivotRow);
 
-            T diag = augmented.get(i, i);
+            T diag = augmented.Get(i, i);
             for (std::size_t j = i; j < 2 * n; ++j)
-                augmented.set(i, j, augmented.get(i, j) / diag);
+                augmented.Set(i, j, augmented.Get(i, j) / diag);
             for (std::size_t k = 0; k < n; ++k) {
                 if (k != i) {
-                    T factor = augmented.get(k, i);
+                    T factor = augmented.Get(k, i);
                     for (std::size_t j = i; j < 2 * n; ++j)
-                        augmented.set(k, j, augmented.get(k, j) - factor * augmented.get(i, j));
+                        augmented.Set(k, j, augmented.Get(k, j) - factor * augmented.Get(i, j));
                 }
             }
         }
         Matrix result(n, n);
         for (std::size_t i = 0; i < n; ++i)
             for (std::size_t j = 0; j < n; ++j)
-                result.set(i, j, augmented.get(i, n + j));
+                result.Set(i, j, augmented.Get(i, n + j));
         return result;
     }
 };
