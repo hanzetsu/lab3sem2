@@ -1,85 +1,126 @@
+// Vector.hpp
 #pragma once
 
-#include <cstddef>
-#include <stdexcept>
+#include "MutableArraySequence.hpp"
+#include "exceptions.hpp"
 #include <cmath>
 #include <initializer_list>
 
-template <typename T, std::size_t N>
-class Vector
-{
-    static_assert(N > 0, "Размерность должна быть положительной");
-
+template <typename T>
+class Vector {
 private:
-    T data[N];
+    MutableArraySequence<T> components;
 
 public:
-    Vector()
-    {
-        for (std::size_t i = 0; i < N; ++i)
-            data[i] = T(0);
+    Vector() = default;
+
+    explicit Vector(std::size_t dim) : components(dim) {
+        for (std::size_t i = 0; i < dim; ++i)
+            components.Set(i, T(0));
     }
 
-    Vector(std::initializer_list<T> list)
-    {
-        if (list.size() != N)
-            throw std::invalid_argument("Неверное количество компонентов");
+    Vector(std::initializer_list<T> list) : components(static_cast<std::size_t>(list.size())) {
         std::size_t i = 0;
-        for (const T &val : list)
-            data[i++] = val;
+        for (const T& val : list)
+            components.Set(i++, val);
     }
 
-    Vector(const Vector &) = default;
-    Vector &operator=(const Vector &) = default;
+    Vector(const Vector&) = default;
+    Vector& operator=(const Vector&) = default;
 
-    T &operator[](std::size_t i)
-    {
-        if (i >= N)
-            throw std::out_of_range("Индекс вектора выходит за границы");
-        return data[i];
+    std::size_t size() const {
+        return components.GetLength();
     }
 
-    const T &operator[](std::size_t i) const
-    {
-        if (i >= N)
-            throw std::out_of_range("Индекс вектора выходит за границы");
-        return data[i];
+    T operator[](std::size_t i) const {
+        return components.Get(i);
     }
 
-    constexpr std::size_t size() const { return N; }
+    void set(std::size_t i, T val) {
+        if (i >= components.GetLength())
+            throw IndexOutOfRange(i, components.GetLength(), "Vector::set");
+        components.Set(i, val);
+    }
 
-    double length() const
-    {
+    T get(std::size_t i) const {
+        return components.Get(i);
+    }
+
+    Vector operator+(const Vector& other) const {
+        std::size_t n = size();
+        if (other.size() != n)
+            throw InvalidArgument("Размерности векторов не совпадают");
+        Vector result(n);
+        for (std::size_t i = 0; i < n; ++i)
+            result.set(i, get(i) + other.get(i));
+        return result;
+    }
+
+    Vector operator-(const Vector& other) const {
+        std::size_t n = size();
+        if (other.size() != n)
+            throw InvalidArgument("Размерности векторов не совпадают");
+        Vector result(n);
+        for (std::size_t i = 0; i < n; ++i)
+            result.set(i, get(i) - other.get(i));
+        return result;
+    }
+
+    Vector operator*(T scalar) const {
+        std::size_t n = size();
+        Vector result(n);
+        for (std::size_t i = 0; i < n; ++i)
+            result.set(i, get(i) * scalar);
+        return result;
+    }
+
+    T dot(const Vector& other) const {
+        std::size_t n = size();
+        if (other.size() != n)
+            throw InvalidArgument("Размерности векторов не совпадают");
+        T sum = T(0);
+        for (std::size_t i = 0; i < n; ++i)
+            sum += get(i) * other.get(i);
+        return sum;
+    }
+
+    double length() const {
         double sum = 0.0;
-        for (std::size_t i = 0; i < N; ++i)
-            sum += static_cast<double>(data[i] * data[i]);
+        for (std::size_t i = 0; i < size(); ++i)
+            sum += static_cast<double>(get(i) * get(i));
         return std::sqrt(sum);
     }
 
-    Vector normalized() const
-    {
+    Vector normalized() const {
         double len = length();
         if (len < 1e-12)
             return *this;
-        Vector result;
-        for (std::size_t i = 0; i < N; ++i)
-            result.data[i] = static_cast<T>(data[i] / len);
+        std::size_t n = size();
+        Vector result(n);
+        for (std::size_t i = 0; i < n; ++i)
+            result.set(i, static_cast<T>(get(i) / len));
         return result;
     }
 
-    Vector operator+(const Vector &other) const
-    {
-        Vector result;
-        for (std::size_t i = 0; i < N; ++i)
-            result.data[i] = data[i] + other.data[i];
-        return result;
+    friend std::ostream& operator<<(std::ostream& os, const Vector& v) {
+        os << "[";
+        for (std::size_t i = 0; i < v.size(); ++i) {
+            if (i > 0) os << ", ";
+            os << v.get(i);
+        }
+        os << "]";
+        return os;
     }
 
-    Vector operator-(const Vector &other) const
-    {
-        Vector result;
-        for (std::size_t i = 0; i < N; ++i)
-            result.data[i] = data[i] - other.data[i];
-        return result;
+    bool operator==(const Vector& other) const {
+        if (size() != other.size()) return false;
+        for (std::size_t i = 0; i < size(); ++i)
+            if (get(i) != other.get(i))
+                return false;
+        return true;
+    }
+
+    bool operator!=(const Vector& other) const {
+        return !(*this == other);
     }
 };
