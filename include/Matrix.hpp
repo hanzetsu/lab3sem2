@@ -82,4 +82,24 @@ public:
                 result.set(i, j, get(i, j) * scalar);
         return result;
     }
+     Matrix operator*(const Matrix& other) const {
+        if (cols != other.rows)
+            throw InvalidArgument("Matrix::*: количество столбцов первой не равно количеству строк второй");
+        Matrix result(rows, other.cols, T(0));
+        for (std::size_t i = 0; i < rows; ++i)
+            for (std::size_t j = 0; j < other.cols; ++j) {
+                T sum = T(0);
+                for (std::size_t k = 0; k < cols; ++k)
+                    sum += get(i, k) * other.get(k, j);
+                result.set(i, j, sum);
+            }
+        return result;
+    }
+        Matrix transpose() const {
+        Matrix result(cols, rows);
+        for (std::size_t i = 0; i < rows; ++i)
+            for (std::size_t j = 0; j < cols; ++j)
+                result.set(j, i, get(i, j));
+        return result;
+    
 };
