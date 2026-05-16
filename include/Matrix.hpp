@@ -145,7 +145,6 @@ public:
         if (rows != cols)
             throw InvalidArgument("Matrix::inverse: матрица не квадратная");
         std::size_t n = rows;
-        // Расширенная матрица [A | I]
         Matrix augmented(n, 2 * n);
         for (std::size_t i = 0; i < n; ++i) {
             for (std::size_t j = 0; j < n; ++j)
@@ -165,8 +164,6 @@ public:
             T diag = augmented.get(i, i);
             for (std::size_t j = i; j < 2 * n; ++j)
                 augmented.set(i, j, augmented.get(i, j) / diag);
-
-            // Обнуление остальных строк в столбце i
             for (std::size_t k = 0; k < n; ++k) {
                 if (k != i) {
                     T factor = augmented.get(k, i);
