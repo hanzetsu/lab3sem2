@@ -5,47 +5,69 @@
 #include <QMessageBox>
 #include <QStringList>
 #include "exceptions.hpp"
+#include "Constants.hpp"
 
 TrajectoryWidget::TrajectoryWidget(QWidget *parent) : QWidget(parent) {
     setupUI();
+    connect(targetMinEdit, &QLineEdit::textChanged, this, &TrajectoryWidget::checkInputs);
+    connect(targetMaxEdit, &QLineEdit::textChanged, this, &TrajectoryWidget::checkInputs);
+    connect(v0ListEdit, &QLineEdit::textChanged, this, &TrajectoryWidget::checkInputs);
+    checkInputs();
 }
 
 void TrajectoryWidget::setupUI() {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-
     QGroupBox *inputGroup = new QGroupBox("Параметры цели и дискретные скорости");
     QGridLayout *grid = new QGridLayout;
 
-    grid->addWidget(new QLabel("Цель Xmin (м):"), 0, 0);
     targetMinEdit = new QLineEdit;
-    targetMinEdit->setPlaceholderText("50");
-    grid->addWidget(targetMinEdit, 0, 1);
-
-    grid->addWidget(new QLabel("Цель Xmax (м):"), 1, 0);
+    targetMinEdit->setPlaceholderText("52");
     targetMaxEdit = new QLineEdit;
-    targetMaxEdit->setPlaceholderText("52");
-    grid->addWidget(targetMaxEdit, 1, 1);
-
-    grid->addWidget(new QLabel("Список скоростей (м/с, через запятую):"), 2, 0);
+    targetMaxEdit->setPlaceholderText("67");
     v0ListEdit = new QLineEdit;
     v0ListEdit->setPlaceholderText("20,25,30,35");
-    grid->addWidget(v0ListEdit, 2, 1);
-
-    inputGroup->setLayout(grid);
-    mainLayout->addWidget(inputGroup);
-
     discreteBtn = new QPushButton("Подобрать скорость и угол");
-    mainLayout->addWidget(discreteBtn);
-
     resultLabel = new QLabel("Результат: ");
-    mainLayout->addWidget(resultLabel);
-
     resultTable = new QTableWidget;
     resultTable->setColumnCount(3);
     resultTable->setHorizontalHeaderLabels({"v0 (м/с)", "Угол (град)", "Дальность (м)"});
+
+    grid->addWidget(new QLabel("Цель Xmin (м):"), 0, 0); grid->addWidget(targetMinEdit, 0, 1);
+    grid->addWidget(new QLabel("Цель Xmax (м):"), 1, 0); grid->addWidget(targetMaxEdit, 1, 1);
+    grid->addWidget(new QLabel("Список скоростей (через запятую):"), 2, 0); grid->addWidget(v0ListEdit, 2, 1);
+    inputGroup->setLayout(grid);
+    mainLayout->addWidget(inputGroup);
+    mainLayout->addWidget(discreteBtn);
+    mainLayout->addWidget(resultLabel);
     mainLayout->addWidget(resultTable);
 
     connect(discreteBtn, &QPushButton::clicked, this, &TrajectoryWidget::onDiscreteClick);
+}
+
+void TrajectoryWidget::checkInputs() {
+    bool ok = true;
+    if (targetMinEdit->text().isEmpty() || targetMaxEdit->text().isEmpty()) {
+        ok = false;
+    } else {
+        double minX = targetMinEdit->text().toDouble();
+        double maxX = targetMaxEdit->text().toDouble();
+        if (minX <= 0 || maxX <= 0) ok = false;
+    }
+    if (v0ListEdit->text().isEmpty()) {
+        ok = false;
+    } else {
+        QStringList parts = v0ListEdit->text().split(',', Qt::SkipEmptyParts);
+        if (parts.isEmpty()) {
+            ok = false;
+        } else {
+            for (const QString& p : parts) {
+                bool conv;
+                p.toDouble(&conv);
+                if (!conv) { ok = false; break; }
+            }
+        }
+    }
+    discreteBtn->setEnabled(ok);
 }
 
 MutableArraySequence<double> TrajectoryWidget::parseV0List(const QString& str) {
@@ -57,12 +79,12 @@ MutableArraySequence<double> TrajectoryWidget::parseV0List(const QString& str) {
         if (!ok) throw InvalidArgument("Неверное значение скорости: " + part.toStdString());
         result.Append(val);
     }
-    if (result.GetLength() == 0)
-        throw InvalidArgument("Список скоростей пуст");
+    if (result.GetLength() == 0) throw InvalidArgument("Список скоростей пуст");
     return result;
 }
 
 void TrajectoryWidget::onDiscreteClick() {
+    if (!discreteBtn->isEnabled()) return;
     try {
         double minX = targetMinEdit->text().toDouble();
         double maxX = targetMaxEdit->text().toDouble();
@@ -73,7 +95,7 @@ void TrajectoryWidget::onDiscreteClick() {
 
         double bestV0, bestAngle, bestRange;
         if (calc.findV0AndAngle(v0List, minX, maxX, 1e-6, bestV0, bestAngle, bestRange)) {
-            double angleDeg = bestAngle * 180.0 / M_PI;
+            double angleDeg = bestAngle * 180.0 / Constants::PI;
             resultLabel->setText(QString("Найдено: v0 = %1 м/с, угол = %2°, дальность = %3 м")
                                  .arg(bestV0).arg(angleDeg, 0, 'f', 2).arg(bestRange, 0, 'f', 2));
             resultTable->setRowCount(1);

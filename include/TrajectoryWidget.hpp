@@ -13,6 +13,7 @@ public:
     explicit TrajectoryWidget(QWidget *parent = nullptr);
 private slots:
     void onDiscreteClick();
+    void checkInputs();
 private:
     QLineEdit *targetMinEdit, *targetMaxEdit;
     QLineEdit *v0ListEdit;
