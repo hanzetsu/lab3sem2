@@ -1,4 +1,3 @@
-// TrajectoryCalculator.hpp
 #pragma once
 
 #include "Vector.hpp"
