@@ -1,4 +1,3 @@
-// MainWindow.hpp
 #pragma once
 
 #include <QMainWindow>
