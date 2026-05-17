@@ -12,13 +12,11 @@ class TrajectoryWidget : public QWidget {
 public:
     explicit TrajectoryWidget(QWidget *parent = nullptr);
 private slots:
-    void onCalculateClick();
     void onDiscreteClick();
 private:
-    QLineEdit *v0Edit;
     QLineEdit *targetMinEdit, *targetMaxEdit;
     QLineEdit *v0ListEdit;
-    QPushButton *calcBtn, *discreteBtn;
+    QPushButton *discreteBtn;
     QLabel *resultLabel;
     QTableWidget *resultTable;
     ProjectileMotionCalculator calc;
