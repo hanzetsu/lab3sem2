@@ -17,11 +17,16 @@ set(GUI_SOURCES
     source/main.cpp
     source/MatrixCalculatorWidget.cpp
     source/MainWindow.cpp
+    source/TrajectoryWidget.cpp
 )
 
 set(GUI_HEADERS
     include/MatrixCalculatorWidget.hpp
     include/MainWindow.hpp
+    include/TrajectoryWidget.hpp
+    include/TrajectoryCalculator.hpp
+    include/Vector.hpp
+    include/constants.hpp
 )
 
 qt_add_executable(Lab3 ${GUI_SOURCES} ${GUI_HEADERS})
@@ -49,3 +54,11 @@ target_include_directories(test_vector PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 add_test(NAME VectorTest COMMAND test_vector)
+
+add_executable(test_trajectory tests/test_trajectory.cpp)
+target_include_directories(test_trajectory PRIVATE
+    ${OLD_INCLUDE_PATH}
+    ${OLD_TESTS_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+add_test(NAME TrajectoryTest COMMAND test_trajectory)
