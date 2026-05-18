@@ -71,6 +71,15 @@ public:
             result.set(i, get(i) * scalar);
         return result;
     }
+    T dot(const Vector &other) const
+    {
+        if (size() != other.size())
+            throw InvalidArgument("Размерности векторов не совпадают");
+        T sum = T(0);
+        for (std::size_t i = 0; i < size(); ++i)
+            sum += get(i) * other.get(i);
+        return sum;
+    }
     bool operator==(const Vector &other) const
     {
         if (size() != other.size())
