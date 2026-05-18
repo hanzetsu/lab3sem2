@@ -105,7 +105,7 @@ void MatrixCalculatorWidget::setupUI()
     connect(scalarEdit, &QLineEdit::textChanged, this, &MatrixCalculatorWidget::onScalarTextChanged);
 
     onMatrixSizeChanged();
-    onScalarTextChanged(scalarEdit->text()); // начальное состояние (пусто – кнопка отключена)
+    onScalarTextChanged(scalarEdit->text());
 }
 
 void MatrixCalculatorWidget::onMatrixSizeChanged()
