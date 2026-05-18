@@ -20,8 +20,10 @@ void MatrixCalculatorWidget::setupUI()
 
     QGroupBox *sizeGroupA = new QGroupBox("Размеры матрицы A");
     QHBoxLayout *sizeLayoutA = new QHBoxLayout;
-    rowsA = new QSpinBox; rowsA->setRange(1, 6);
-    colsA = new QSpinBox; colsA->setRange(1, 6);
+    rowsA = new QSpinBox;
+    rowsA->setRange(1, 6);
+    colsA = new QSpinBox;
+    colsA->setRange(1, 6);
     sizeLayoutA->addWidget(new QLabel("Строки:"));
     sizeLayoutA->addWidget(rowsA);
     sizeLayoutA->addWidget(new QLabel("Столбцы:"));
@@ -30,8 +32,10 @@ void MatrixCalculatorWidget::setupUI()
 
     QGroupBox *sizeGroupB = new QGroupBox("Размеры матрицы B");
     QHBoxLayout *sizeLayoutB = new QHBoxLayout;
-    rowsB = new QSpinBox; rowsB->setRange(1, 6);
-    colsB = new QSpinBox; colsB->setRange(1, 6);
+    rowsB = new QSpinBox;
+    rowsB->setRange(1, 6);
+    colsB = new QSpinBox;
+    colsB->setRange(1, 6);
     sizeLayoutB->addWidget(new QLabel("Строки:"));
     sizeLayoutB->addWidget(rowsB);
     sizeLayoutB->addWidget(new QLabel("Столбцы:"));
@@ -60,7 +64,8 @@ void MatrixCalculatorWidget::setupUI()
     QPushButton *invBtn = new QPushButton("Обратная A");
     QPushButton *randomFillBtn = new QPushButton("Случайно заполнить A и B");
 
-    scalarEdit = new QLineEdit; scalarEdit->setPlaceholderText("Скаляр");
+    scalarEdit = new QLineEdit;
+    scalarEdit->setPlaceholderText("Скаляр");
     detLabel = new QLabel("Определитель: ");
 
     buttonLayout->addWidget(addBtn, 0, 0);
@@ -120,33 +125,41 @@ void MatrixCalculatorWidget::onMatrixSizeChanged()
                 tableB->setItem(i, j, new QTableWidgetItem("0"));
 }
 
-void MatrixCalculatorWidget::fillMatrixFromTable(Matrix<double, MutableArraySequence>& mat, QTableWidget* table)
+void MatrixCalculatorWidget::fillMatrixFromTable(Matrix<double, MutableArraySequence> &mat, QTableWidget *table)
 {
     int rows = table->rowCount();
     int cols = table->columnCount();
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
             QTableWidgetItem *item = table->item(i, j);
-            if (item) {
+            if (item)
+            {
                 bool ok;
                 double val = item->text().toDouble(&ok);
-                if (!ok) val = 0.0;
+                if (!ok)
+                    val = 0.0;
                 mat.Set(i, j, val);
-            } else {
+            }
+            else
+            {
                 mat.Set(i, j, 0.0);
             }
         }
     }
 }
 
-void MatrixCalculatorWidget::displayMatrix(const Matrix<double, MutableArraySequence>& mat, QTableWidget* table)
+void MatrixCalculatorWidget::displayMatrix(const Matrix<double, MutableArraySequence> &mat, QTableWidget *table)
 {
     size_t rows = mat.getRows();
     size_t cols = mat.getCols();
     table->setRowCount(static_cast<int>(rows));
     table->setColumnCount(static_cast<int>(cols));
-    for (size_t i = 0; i < rows; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
+    for (size_t i = 0; i < rows; ++i)
+    {
+        for (size_t j = 0; j < cols; ++j)
+        {
             double val = mat.Get(i, j);
             QTableWidgetItem *item = new QTableWidgetItem(QString::number(val));
             table->setItem(static_cast<int>(i), static_cast<int>(j), item);
@@ -154,17 +167,19 @@ void MatrixCalculatorWidget::displayMatrix(const Matrix<double, MutableArraySequ
     }
 }
 
-void MatrixCalculatorWidget::showError(const QString& msg)
+void MatrixCalculatorWidget::showError(const QString &msg)
 {
     QMessageBox::critical(this, "Ошибка", msg);
 }
 
 void MatrixCalculatorWidget::onAddClicked()
 {
-    try {
+    try
+    {
         int ra = rowsA->value(), ca = colsA->value();
         int rb = rowsB->value(), cb = colsB->value();
-        if (ra != rb || ca != cb) {
+        if (ra != rb || ca != cb)
+        {
             showError("Размеры матриц не совпадают для сложения");
             return;
         }
@@ -174,17 +189,21 @@ void MatrixCalculatorWidget::onAddClicked()
         Matrix<double, MutableArraySequence> C = A + B;
         displayMatrix(C, resultTable);
         detLabel->setText("Определитель: ");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         showError(e.what());
     }
 }
 
 void MatrixCalculatorWidget::onSubtractClicked()
 {
-    try {
+    try
+    {
         int ra = rowsA->value(), ca = colsA->value();
         int rb = rowsB->value(), cb = colsB->value();
-        if (ra != rb || ca != cb) {
+        if (ra != rb || ca != cb)
+        {
             showError("Размеры матриц не совпадают для вычитания");
             return;
         }
@@ -194,17 +213,21 @@ void MatrixCalculatorWidget::onSubtractClicked()
         Matrix<double, MutableArraySequence> C = A - B;
         displayMatrix(C, resultTable);
         detLabel->setText("Определитель: ");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         showError(e.what());
     }
 }
 
 void MatrixCalculatorWidget::onMultiplyClicked()
 {
-    try {
+    try
+    {
         int ra = rowsA->value(), ca = colsA->value();
         int rb = rowsB->value(), cb = colsB->value();
-        if (ca != rb) {
+        if (ca != rb)
+        {
             showError("Количество столбцов A должно равняться количеству строк B");
             return;
         }
@@ -214,18 +237,22 @@ void MatrixCalculatorWidget::onMultiplyClicked()
         Matrix<double, MutableArraySequence> C = A * B;
         displayMatrix(C, resultTable);
         detLabel->setText("Определитель: ");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         showError(e.what());
     }
 }
 
 void MatrixCalculatorWidget::onScalarMultiplyClicked()
 {
-    try {
+    try
+    {
         int ra = rowsA->value(), ca = colsA->value();
         bool ok;
         double scalar = scalarEdit->text().toDouble(&ok);
-        if (!ok) {
+        if (!ok)
+        {
             showError("Введите корректный скаляр");
             return;
         }
@@ -234,30 +261,37 @@ void MatrixCalculatorWidget::onScalarMultiplyClicked()
         Matrix<double, MutableArraySequence> C = A * scalar;
         displayMatrix(C, resultTable);
         detLabel->setText("Определитель: ");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         showError(e.what());
     }
 }
 
 void MatrixCalculatorWidget::onTransposeClicked()
 {
-    try {
+    try
+    {
         int ra = rowsA->value(), ca = colsA->value();
         Matrix<double, MutableArraySequence> A(ra, ca);
         fillMatrixFromTable(A, tableA);
         Matrix<double, MutableArraySequence> C = A.transpose();
         displayMatrix(C, resultTable);
         detLabel->setText("Определитель: ");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         showError(e.what());
     }
 }
 
 void MatrixCalculatorWidget::onDeterminantClicked()
 {
-    try {
+    try
+    {
         int ra = rowsA->value(), ca = colsA->value();
-        if (ra != ca) {
+        if (ra != ca)
+        {
             showError("Определитель вычисляется только для квадратной матрицы");
             return;
         }
@@ -267,16 +301,20 @@ void MatrixCalculatorWidget::onDeterminantClicked()
         detLabel->setText("Определитель: " + QString::number(det));
         resultTable->clear();
         resultTable->setRowCount(0);
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         showError(e.what());
     }
 }
 
 void MatrixCalculatorWidget::onInverseClicked()
 {
-    try {
+    try
+    {
         int ra = rowsA->value(), ca = colsA->value();
-        if (ra != ca) {
+        if (ra != ca)
+        {
             showError("Обратная матрица существует только для квадратной матрицы");
             return;
         }
@@ -285,7 +323,9 @@ void MatrixCalculatorWidget::onInverseClicked()
         Matrix<double, MutableArraySequence> C = A.inverse();
         displayMatrix(C, resultTable);
         detLabel->setText("Определитель: ");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         showError(e.what());
     }
 }
@@ -295,14 +335,18 @@ void MatrixCalculatorWidget::onRandomFillClicked()
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     int ra = rowsA->value(), ca = colsA->value();
     int rb = rowsB->value(), cb = colsB->value();
-    for (int i = 0; i < ra; ++i) {
-        for (int j = 0; j < ca; ++j) {
+    for (int i = 0; i < ra; ++i)
+    {
+        for (int j = 0; j < ca; ++j)
+        {
             double val = (std::rand() % 20) - 10; // -10..9
             tableA->setItem(i, j, new QTableWidgetItem(QString::number(val)));
         }
     }
-    for (int i = 0; i < rb; ++i) {
-        for (int j = 0; j < cb; ++j) {
+    for (int i = 0; i < rb; ++i)
+    {
+        for (int j = 0; j < cb; ++j)
+        {
             double val = (std::rand() % 20) - 10;
             tableB->setItem(i, j, new QTableWidgetItem(QString::number(val)));
         }
