@@ -5,6 +5,7 @@
 #include <QSpinBox>
 #include <QPushButton>
 #include <QLabel>
+#include <QLineEdit>
 #include "Matrix.hpp"
 #include "MutableArraySequence.hpp"
 
@@ -25,6 +26,7 @@ private slots:
     void onDeterminantClicked();
     void onInverseClicked();
     void onRandomFillClicked();
+    void onScalarTextChanged(const QString &text);
 
 private:
     QSpinBox *rowsA, *colsA;
@@ -32,10 +34,10 @@ private:
     QTableWidget *tableA, *tableB;
     QTableWidget *resultTable;
     QLineEdit *scalarEdit;
+    QPushButton *scalarMulBtn;
     QLabel *detLabel;
 
     void setupUI();
-    void updateTablesSize();
     void fillMatrixFromTable(Matrix<double, MutableArraySequence>& mat, QTableWidget* table);
     void displayMatrix(const Matrix<double, MutableArraySequence>& mat, QTableWidget* table);
     void showError(const QString& msg);

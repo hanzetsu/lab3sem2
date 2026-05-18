@@ -58,7 +58,7 @@ void MatrixCalculatorWidget::setupUI()
     QPushButton *addBtn = new QPushButton("Сложение (A+B)");
     QPushButton *subBtn = new QPushButton("Вычитание (A-B)");
     QPushButton *mulBtn = new QPushButton("Умножение (A*B)");
-    QPushButton *scalarMulBtn = new QPushButton("Умножить A на скаляр");
+    scalarMulBtn = new QPushButton("Умножить A на скаляр");
     QPushButton *transposeBtn = new QPushButton("Транспонировать A");
     QPushButton *detBtn = new QPushButton("Определитель A");
     QPushButton *invBtn = new QPushButton("Обратная A");
@@ -102,7 +102,10 @@ void MatrixCalculatorWidget::setupUI()
     connect(invBtn, &QPushButton::clicked, this, &MatrixCalculatorWidget::onInverseClicked);
     connect(randomFillBtn, &QPushButton::clicked, this, &MatrixCalculatorWidget::onRandomFillClicked);
 
+    connect(scalarEdit, &QLineEdit::textChanged, this, &MatrixCalculatorWidget::onScalarTextChanged);
+
     onMatrixSizeChanged();
+    onScalarTextChanged(scalarEdit->text()); // начальное состояние (пусто – кнопка отключена)
 }
 
 void MatrixCalculatorWidget::onMatrixSizeChanged()
@@ -170,6 +173,18 @@ void MatrixCalculatorWidget::displayMatrix(const Matrix<double, MutableArraySequ
 void MatrixCalculatorWidget::showError(const QString &msg)
 {
     QMessageBox::critical(this, "Ошибка", msg);
+}
+
+void MatrixCalculatorWidget::onScalarTextChanged(const QString &text)
+{
+    if (text.isEmpty())
+    {
+        scalarMulBtn->setEnabled(false);
+        return;
+    }
+    bool ok;
+    text.toDouble(&ok);
+    scalarMulBtn->setEnabled(ok);
 }
 
 void MatrixCalculatorWidget::onAddClicked()
