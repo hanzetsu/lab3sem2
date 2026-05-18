@@ -18,6 +18,7 @@ set(GUI_SOURCES
     source/MatrixCalculatorWidget.cpp
     source/MainWindow.cpp
     source/TrajectoryWidget.cpp
+    source/TrajectoryCanvas.cpp
 )
 
 set(GUI_HEADERS
@@ -27,6 +28,7 @@ set(GUI_HEADERS
     include/TrajectoryCalculator.hpp
     include/Vector.hpp
     include/constants.hpp
+    include/TrajectoryCanvas.hpp
 )
 
 qt_add_executable(Lab3 ${GUI_SOURCES} ${GUI_HEADERS})

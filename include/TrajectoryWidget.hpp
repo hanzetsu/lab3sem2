@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QTableWidget>
 #include "TrajectoryCalculator.hpp"
+#include "TrajectoryCanvas.hpp"
 
 class TrajectoryWidget : public QWidget {
     Q_OBJECT
@@ -20,6 +21,7 @@ private:
     QPushButton *discreteBtn;
     QLabel *resultLabel;
     QTableWidget *resultTable;
+    TrajectoryCanvas *canvas;
     ProjectileMotionCalculator calc;
     void setupUI();
     MutableArraySequence<double> parseV0List(const QString& str);
