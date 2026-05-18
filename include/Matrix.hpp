@@ -4,7 +4,7 @@
 #include <cmath>
 
 template <typename T, template <typename> class Container>
-    requires SequenceLike<Container<T>>
+    requires SequenceLike<Container<T>> && Vectorizable<T>
 class Matrix
 {
 private:

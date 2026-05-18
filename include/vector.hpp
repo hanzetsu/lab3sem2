@@ -7,7 +7,7 @@
 #include <initializer_list>
 
 template <typename T, template <typename> class Container = MutableArraySequence>
-    requires SequenceLike<Container<T>>
+    requires SequenceLike<Container<T>> && Vectorizable<T>
 class Vector {
 private:
     Container<T> comps;
