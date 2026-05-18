@@ -1,6 +1,7 @@
-// test_vector.cpp
 #include "Vector.hpp"
 #include "test_common.hpp"
+#include "DynamicArray.hpp"
+#include <ranges>
 #include <iostream>
 
 bool testVectorConstruction() {
@@ -8,14 +9,11 @@ bool testVectorConstruction() {
     Vector<int> v1(3);
     TEST_ASSERT(v1.size() == 3, "Размер не 3");
     TEST_ASSERT(v1[0] == 0 && v1[1] == 0 && v1[2] == 0, "Нулевой вектор не обнулён");
-
     Vector<int> v2{1, 2, 3};
     TEST_ASSERT(v2.size() == 3, "Размер не 3");
     TEST_ASSERT(v2[0] == 1 && v2[1] == 2 && v2[2] == 3, "Конструктор из списка");
-
     Vector<int> v3(v2);
     TEST_ASSERT(v3[0] == 1 && v3[1] == 2 && v3[2] == 3, "Конструктор копирования");
-
     std::cout << "    OK" << std::endl;
     return true;
 }
@@ -79,12 +77,14 @@ bool testVectorComparison() {
 
 bool testVector() {
     std::cout << "\n=== Тестирование Vector ===" << std::endl;
-    if (!testVectorConstruction()) return false;
-    if (!testVectorSetGet()) return false;
-    if (!testVectorArithmetic()) return false;
-    if (!testVectorLengthNormalize()) return false;
-    if (!testVectorComparison()) return false;
-    return true;
+    auto tests = DynamicArray{
+        testVectorConstruction,
+        testVectorSetGet,
+        testVectorArithmetic,
+        testVectorLengthNormalize,
+        testVectorComparison
+    };
+    return std::ranges::all_of(tests, [](auto f) { return f(); });
 }
 
 int main() {

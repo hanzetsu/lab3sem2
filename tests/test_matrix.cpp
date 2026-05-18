@@ -1,8 +1,9 @@
 #include "Matrix.hpp"
 #include "MutableArraySequence.hpp"
 #include "exceptions.hpp"
-#include <iostream>
-#include <cassert>
+#include "test_common.hpp"
+#include "DynamicArray.hpp"
+#include <ranges>
 #include <cmath>
 
 using Mat = Matrix<double, MutableArraySequence>;
@@ -17,8 +18,8 @@ bool matrixEqual(const Mat& a, const Mat& b, double eps = 1e-9) {
     return true;
 }
 
-void testMatrixAddition() {
-    std::cout << "Тест сложения матриц..." << std::endl;
+bool testMatrixAddition() {
+    std::cout << "  Проверка сложения матриц..." << std::endl;
     Mat a(2, 2, 0.0);
     a.Set(0, 0, 1); a.Set(0, 1, 2);
     a.Set(1, 0, 3); a.Set(1, 1, 4);
@@ -29,12 +30,13 @@ void testMatrixAddition() {
     expected.Set(0, 0, 6); expected.Set(0, 1, 8);
     expected.Set(1, 0, 10); expected.Set(1, 1, 12);
     Mat result = a + b;
-    assert(matrixEqual(result, expected));
-    std::cout << "  OK" << std::endl;
+    TEST_ASSERT(matrixEqual(result, expected), "сложение матриц неверно");
+    std::cout << "    OK" << std::endl;
+    return true;
 }
 
-void testMatrixSubtraction() {
-    std::cout << "Тест вычитания матриц..." << std::endl;
+bool testMatrixSubtraction() {
+    std::cout << "  Проверка вычитания матриц..." << std::endl;
     Mat a(2, 2, 0.0);
     a.Set(0,0,5); a.Set(0,1,6);
     a.Set(1,0,7); a.Set(1,1,8);
@@ -45,12 +47,13 @@ void testMatrixSubtraction() {
     expected.Set(0,0,4); expected.Set(0,1,4);
     expected.Set(1,0,4); expected.Set(1,1,4);
     Mat result = a - b;
-    assert(matrixEqual(result, expected));
-    std::cout << "  OK" << std::endl;
+    TEST_ASSERT(matrixEqual(result, expected), "вычитание матриц неверно");
+    std::cout << "    OK" << std::endl;
+    return true;
 }
 
-void testScalarMultiplication() {
-    std::cout << "Тест умножения на скаляр..." << std::endl;
+bool testScalarMultiplication() {
+    std::cout << "  Проверка умножения на скаляр..." << std::endl;
     Mat a(2,2,0.0);
     a.Set(0,0,1); a.Set(0,1,2);
     a.Set(1,0,3); a.Set(1,1,4);
@@ -59,12 +62,13 @@ void testScalarMultiplication() {
     expected.Set(0,0,2); expected.Set(0,1,4);
     expected.Set(1,0,6); expected.Set(1,1,8);
     Mat result = a * scalar;
-    assert(matrixEqual(result, expected));
-    std::cout << "  OK" << std::endl;
+    TEST_ASSERT(matrixEqual(result, expected), "умножение на скаляр неверно");
+    std::cout << "    OK" << std::endl;
+    return true;
 }
 
-void testMatrixMultiplication() {
-    std::cout << "Тест умножения матриц..." << std::endl;
+bool testMatrixMultiplication() {
+    std::cout << "  Проверка умножения матриц..." << std::endl;
     Mat a(2,3,0.0);
     a.Set(0,0,1); a.Set(0,1,2); a.Set(0,2,3);
     a.Set(1,0,4); a.Set(1,1,5); a.Set(1,2,6);
@@ -78,37 +82,37 @@ void testMatrixMultiplication() {
     expected.Set(1,0,4*7+5*9+6*11);
     expected.Set(1,1,4*8+5*10+6*12);
     Mat result = a * b;
-    assert(matrixEqual(result, expected));
-    std::cout << "  OK" << std::endl;
+    TEST_ASSERT(matrixEqual(result, expected), "умножение матриц неверно");
+    std::cout << "    OK" << std::endl;
+    return true;
 }
 
-void testDeterminant() {
-    std::cout << "Тест определителя..." << std::endl;
+bool testDeterminant() {
+    std::cout << "  Проверка определителя..." << std::endl;
     Mat a(2,2,0.0);
     a.Set(0,0,1); a.Set(0,1,2);
     a.Set(1,0,3); a.Set(1,1,4);
     double det = a.determinant();
-    assert(std::fabs(det + 2.0) < 1e-9); // 1*4 - 2*3 = -2
-    std::cout << "  det(2x2) = " << det << " OK" << std::endl;
-
+    TEST_ASSERT(std::fabs(det + 2.0) < 1e-9, "определитель 2x2 неверен");
+    std::cout << "    det(2x2) = " << det << std::endl;
     Mat b(3,3,0.0);
     b.Set(0,0,2); b.Set(0,1,-1); b.Set(0,2,0);
     b.Set(1,0,-1); b.Set(1,1,2); b.Set(1,2,-1);
     b.Set(2,0,0); b.Set(2,1,-1); b.Set(2,2,2);
     det = b.determinant();
-    assert(std::fabs(det - 4.0) < 1e-9);
-    std::cout << "  det(3x3) = " << det << " OK" << std::endl;
-
+    TEST_ASSERT(std::fabs(det - 4.0) < 1e-9, "определитель 3x3 неверен");
+    std::cout << "    det(3x3) = " << det << std::endl;
     Mat c(2,2,0.0);
     c.Set(0,0,1); c.Set(0,1,2);
     c.Set(1,0,2); c.Set(1,1,4);
     det = c.determinant();
-    assert(std::fabs(det) < 1e-9);
-    std::cout << "  det(вырожденная) = 0 OK" << std::endl;
+    TEST_ASSERT(std::fabs(det) < 1e-9, "определитель вырожденной не 0");
+    std::cout << "    det(вырожденная) = 0" << std::endl;
+    return true;
 }
 
-void testInverse() {
-    std::cout << "Тест обратной матрицы..." << std::endl;
+bool testInverse() {
+    std::cout << "  Проверка обратной матрицы..." << std::endl;
     Mat a(2,2,0.0);
     a.Set(0,0,4); a.Set(0,1,7);
     a.Set(1,0,2); a.Set(1,1,6);
@@ -116,78 +120,90 @@ void testInverse() {
     Mat expected(2,2,0.0);
     expected.Set(0,0,0.6); expected.Set(0,1,-0.7);
     expected.Set(1,0,-0.2); expected.Set(1,1,0.4);
-    assert(matrixEqual(inv, expected, 1e-9));
+    TEST_ASSERT(matrixEqual(inv, expected, 1e-9), "обратная матрица неверна");
     Mat prod = a * inv;
     Mat ident(2,2,0.0);
     ident.Set(0,0,1); ident.Set(0,1,0);
     ident.Set(1,0,0); ident.Set(1,1,1);
-    assert(matrixEqual(prod, ident, 1e-9));
-    std::cout << "  Обратная матрица для 2x2 OK" << std::endl;
-
+    TEST_ASSERT(matrixEqual(prod, ident, 1e-9), "A * A⁻¹ не равно единичной");
     Mat c(2,2,0.0);
     c.Set(0,0,1); c.Set(0,1,2);
     c.Set(1,0,2); c.Set(1,1,4);
     try {
         c.inverse();
-        assert(false && "Не выброшено исключение для вырожденной матрицы");
-    } catch (const InvalidArgument& e) {
-    }
-    std::cout << "  Вырожденная матрица: исключение OK" << std::endl;
+        TEST_ASSERT(false, "не выброшено исключение для вырожденной матрицы");
+    } catch (const InvalidArgument&) {}
+    std::cout << "    OK" << std::endl;
+    return true;
 }
 
-void testTranspose() {
-    std::cout << "Тест транспонирования..." << std::endl;
+bool testTranspose() {
+    std::cout << "  Проверка транспонирования..." << std::endl;
     Mat a(2,3,0.0);
     a.Set(0,0,1); a.Set(0,1,2); a.Set(0,2,3);
     a.Set(1,0,4); a.Set(1,1,5); a.Set(1,2,6);
     Mat t = a.transpose();
-    assert(t.getRows() == 3 && t.getCols() == 2);
-    assert(t.Get(0,0) == 1 && t.Get(0,1) == 4);
-    assert(t.Get(1,0) == 2 && t.Get(1,1) == 5);
-    assert(t.Get(2,0) == 3 && t.Get(2,1) == 6);
-    std::cout << "  OK" << std::endl;
+    TEST_ASSERT(t.getRows() == 3 && t.getCols() == 2, "размеры транспонированной матрицы неверны");
+    TEST_ASSERT(t.Get(0,0) == 1 && t.Get(0,1) == 4, "элемент (0,0)");
+    TEST_ASSERT(t.Get(1,0) == 2 && t.Get(1,1) == 5, "элемент (1,0)");
+    TEST_ASSERT(t.Get(2,0) == 3 && t.Get(2,1) == 6, "элемент (2,0)");
+    std::cout << "    OK" << std::endl;
+    return true;
 }
 
-void testExceptions() {
-    std::cout << "Тест исключений при несовместимых размерах..." << std::endl;
+bool testExceptions() {
+    std::cout << "  Проверка исключений при несовместимых размерах..." << std::endl;
     Mat a(2,2);
     Mat b(3,3);
     try {
         Mat c = a + b;
-        assert(false);
+        TEST_ASSERT(false, "не выброшено исключение при сложении");
     } catch (const InvalidArgument&) {}
     try {
         Mat c = a - b;
-        assert(false);
+        TEST_ASSERT(false, "не выброшено исключение при вычитании");
     } catch (const InvalidArgument&) {}
     try {
         Mat c = a * b;
-        assert(false);
+        TEST_ASSERT(false, "не выброшено исключение при умножении");
     } catch (const InvalidArgument&) {}
     try {
         a.determinant();
-    } catch (...) { assert(false); }
+    } catch (...) { TEST_ASSERT(false, "исключение при вычислении определителя квадратной матрицы"); }
     try {
         Mat(2,3).determinant();
-        assert(false);
+        TEST_ASSERT(false, "не выброшено исключение для неквадратной матрицы");
     } catch (const InvalidArgument&) {}
-    std::cout << "  OK" << std::endl;
+    std::cout << "    OK" << std::endl;
+    return true;
+}
+
+bool testMatrix() {
+    std::cout << "\n=== Тестирование Matrix ===" << std::endl;
+    auto tests = DynamicArray{
+        testMatrixAddition,
+        testMatrixSubtraction,
+        testScalarMultiplication,
+        testMatrixMultiplication,
+        testDeterminant,
+        testInverse,
+        testTranspose,
+        testExceptions
+    };
+    return std::ranges::all_of(tests, [](auto f) { return f(); });
 }
 
 int main() {
     try {
-        testMatrixAddition();
-        testMatrixSubtraction();
-        testScalarMultiplication();
-        testMatrixMultiplication();
-        testDeterminant();
-        testInverse();
-        testTranspose();
-        testExceptions();
-        std::cout << "\nВсе тесты матрицы пройдены успешно!" << std::endl;
+        if (testMatrix()) {
+            std::cout << "\n=== Все тесты матрицы пройдены ===" << std::endl;
+            return 0;
+        } else {
+            std::cerr << "\n=== Тесты матрицы не пройдены ===" << std::endl;
+            return 1;
+        }
     } catch (const std::exception& e) {
-        std::cerr << "Ошибка: " << e.what() << std::endl;
+        std::cerr << "Исключение: " << e.what() << std::endl;
         return 1;
     }
-    return 0;
 }

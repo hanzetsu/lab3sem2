@@ -1,8 +1,9 @@
 #include "TrajectoryCalculator.hpp"
 #include "MutableArraySequence.hpp"
 #include "test_common.hpp"
+#include "DynamicArray.hpp"
 #include "Constants.hpp"
-#include <iostream>
+#include <ranges>
 #include <cmath>
 
 bool testCalculateRange() {
@@ -59,6 +60,7 @@ bool testFindV0AndAngle() {
     std::cout << "    OK" << std::endl;
     return true;
 }
+
 bool testFindV0AndAngleEmptyList() {
     std::cout << "  Проверка findV0AndAngle с пустым списком" << std::endl;
     ProjectileMotionCalculator calc;
@@ -73,12 +75,14 @@ bool testFindV0AndAngleEmptyList() {
 
 bool testTrajectory() {
     std::cout << "\n=== Тестирование ProjectileMotionCalculator ===" << std::endl;
-    if (!testCalculateRange()) return false;
-    if (!testFindAngle()) return false;
-    if (!testFindAngleUnreachable()) return false;
-    if (!testFindV0AndAngle()) return false;
-    if (!testFindV0AndAngleEmptyList()) return false;
-    return true;
+    auto tests = DynamicArray{
+        testCalculateRange,
+        testFindAngle,
+        testFindAngleUnreachable,
+        testFindV0AndAngle,
+        testFindV0AndAngleEmptyList
+    };
+    return std::ranges::all_of(tests, [](auto f) { return f(); });
 }
 
 int main() {
